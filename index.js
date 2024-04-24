@@ -1,5 +1,12 @@
 import puppeteer from "puppeteer";
 import { Crawler } from "./crawler.js";
+import ExcelJS from 'exceljs';
+import express from 'express';
+import fs from 'fs';
+import path from 'path';
+
+const app = express();
+
 
 class Process {
     static START_URL = process.argv[2];
@@ -27,6 +34,31 @@ class Process {
     };
 
     console.log(crawler.getStoredAll)
-
+    
     await browser.close();
+
+    app.get('/download', async (req, res) => {
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Sheet 1');
+    
+        worksheet.addRow(['Club Name', 'Email']);
+        
+        data.foreach(column => {
+            worksheet.addTable([column.club, column.email]);
+        });
+
+        const buffer = await workbook.xlsx.writeBuffer();
+
+        res.setHeader('Content=Disposition', 'attachment; filename="data.xlsx"');
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+
+        res.send(buffer);
+    })
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+        console.log('Server is running on port ${PORT}');
+    });
+
+    
 })();
+
