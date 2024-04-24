@@ -1,19 +1,22 @@
 import puppeteer from "puppeteer";
 import { Crawler } from "./crawler.js";
-import ExcelJS from 'exceljs';
-import express from 'express';
-import fs from 'fs';
-import path from 'path';
+import { google } from "googleapis";
+import { fs } from 'fs';
 
-const app = express();
+//load credentials from a json file
+const credentials = require('./test-project-421313-b6dd67e500ad');
 
+
+//Googe sheets API credentials
+const { client_secret, client_id, redirect_uris } = credentials.installed;
+const oAuth2Client = new google.auth.OAuth2(client_secret, client_id, redirect_uris[O]);
 
 class Process {
     static START_URL = process.argv[2];
 }
 
 
-(async () => {
+async function scrapeDate() {
     /*
         initializes browser and page, scrapes all urls on the page and iterates over them
     */
@@ -32,10 +35,41 @@ class Process {
     for (let i = 0; i < clubs.length; i++) {
         await crawler.crawl(page, clubs[i]);
     };
-
-    console.log(crawler.getStoredAll)
     
     await browser.close();
 
-});
+};
 
+async function writeToGoogleSheets(getStoredAll){
+    const token = fs.readFileSync('token.json');
+    oAuth2Client.setCredentials(JSON.parse(token));
+    const sheets = google.sheets({version: 'v4', auth: oAuth2Client });
+
+    const spreadsheetId = 'test-webscraper';
+    const range = 'Sheet1!A1:B1';
+
+    const values = [
+        [getStoredAll.names, getStoredAll.email],
+    ];
+
+    const result = await sheets.spreadsheets.values.update({
+        spreadsheetId,
+        range,
+        valueInputOption: 'RAW',
+        resource: { values },
+    });
+
+    console.log(`${result.getStoredAll.updatedCells} cells updated.`)
+
+}
+
+async function main() {
+    try{
+        const scrapedData = await scrapeDate();
+        await writeToGoogleSheets(scrapedData);
+    } catch(error){
+        console.error('Error: ', error);
+    }
+}
+
+main();
