@@ -1,7 +1,7 @@
 import puppeteer from "puppeteer";
 import { Crawler } from "./crawler.js";
 import { google } from "googleapis";
-import { fs } from 'fs';
+import fs from 'fs';
 
 //load credentials from a json file
 const credentials = require('./test-project-421313-b6dd67e500ad');
