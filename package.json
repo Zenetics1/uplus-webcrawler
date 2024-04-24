@@ -5,12 +5,14 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "start": "node --experimental-modules index.js"
   },
   "author": "Pranavan-K",
   "license": "ISC",
   "dependencies": {
-    "puppeteer": "^22.6.5"
+    "exceljs": "^4.4.0",
+    "express": "^4.19.2",
+    "puppeteer": "^22.7.0"
   },
   "type": "module"
 }
